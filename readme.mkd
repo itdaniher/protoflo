@@ -1,15 +1,9 @@
+### protoflo
 
-This branch contains the development files for a USB reflow oven control board, working title "thermowut."
+This branch contains the development files for the only Poi head to move like you do. 
 
-The design shares many features with the CEE.
+Protoflo contains a high-speed accelerometer monitoring your spin, changing color and pattern hundreds of times a second. It's 100% open and designed to be hackable, giving you the power to map moves to patterns and speed to color. 
 
-**Features**
-
-  - MAX31855 K-type Thermocouple Interface, giving two-degree accuracy from +700degC to -200degC
-  - Array of Digital Control Pins
-  - 32MHz RISC processor - ATXMEGA32A4U 
-
-
-Development is ongoing.
+Protoflo also charges over USB, keeping you green.
 
 All CAD files, schematics, and board layouts for this project are released under a [CC-by-SA(Share-Alike) license](http://creativecommons.org/licenses/by-sa/3.0/).
