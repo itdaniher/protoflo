@@ -97,7 +97,7 @@ FORMAT = ihex
 
 
 # Target file name (without extension).
-TARGET = cee
+TARGET = protoflo
 
 
 # Object files directory

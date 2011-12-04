@@ -1,6 +1,6 @@
 import usb.core
 
-class Thermowut(object):
+class Protoflo(object):
 	unTwos = lambda self, n: n - (1<<12) if n>2048 else n   
 
 	def __init__(self):
@@ -13,14 +13,9 @@ class Thermowut(object):
 			
 		self.dev.set_configuration()
 
-	def getValue(self):
-		data = self.dev.ctrl_transfer(0x40|0x80, 0xA0, 0, 0, 4)
-		return self.unTwos((data[2] << 8 | data[3]) >> 4)
+	def setLED0(self, channel, value):
+		self.dev.ctrl_transfer(0x40|0x80, 0x70, value, channel, 0)	
 
-	def toggleLED(self):
-		self.dev.ctrl_transfer(0x40|0x80, 0x73, 0, 0, 0)	
-
-if __name__ == "__main__":
-	thermowut = Thermowut()
-	while True:
-		thermowut.getValue()
+	def getAccel(self):
+		data = self.dev.ctrl_transfer(0x40|0x80, 0xAC, 0, 0, 6)
+		return [data[0]<<8|data[1], data[2]<<8|data[3], data[4]<<8|data[5]]
