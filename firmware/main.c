@@ -69,13 +69,10 @@ bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req){
 				USB_ep0_send(0);
 				break;
 			case 0xAC: // accelerometer
-				ep0_buf_in[0] = ADCA.CH0.RESH;
-				ep0_buf_in[1] = ADCA.CH0.RESL;
-				ep0_buf_in[2] = ADCA.CH1.RESH;
-				ep0_buf_in[3] = ADCA.CH1.RESL;
-				ep0_buf_in[4] = ADCA.CH2.RESH;
-				ep0_buf_in[5] = ADCA.CH2.RESL;
-				USB_ep0_send(6);
+				ep0_buf_in[0] = (ADCA.CH0.RES>>2)&0xFF;
+				ep0_buf_in[1] = (ADCA.CH1.RES>>2)&0xFF;
+				ep0_buf_in[2] = (ADCA.CH2.RES>>2)&0xFF;
+				USB_ep0_send(3);
 				break;
 			case 0xBB: // bootload
 				USB_ep0_send(0);
