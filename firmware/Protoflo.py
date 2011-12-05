@@ -40,6 +40,7 @@ class Protoflo(object):
 		self.dev.ctrl_transfer(0x40|0x80, 0x70, self.LED0.G, 2, 0)	
 
 	def setLEDs(self):
+		self.setLED0()
 		i = 0
 		for LEDVal in self.otherLEDs:
 			self.dev.ctrl_transfer(0x40|0x80, 0x73, LEDVal, i, 0)  

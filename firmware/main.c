@@ -15,7 +15,6 @@ bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req);
 int main(void){
 	configHardware();
 	sei();	
-
 	while (1){
 			USB_Task(); // Lower-priority USB polling, like control requests
 	}
@@ -31,7 +30,7 @@ void initLED0(void){
 
 void initOtherLEDs(void){
 	PORTB.DIRSET = 1 << 0 | 1 << 1;
-	PORTC.DIRSET = 1 << 1 | 1 << 2 | 1 << 6 | 1 << 7;;
+	PORTC.DIRSET = 1 << 1 | 1 << 2 | 1 << 5 | 1 << 7;
 }
 
 void initADC(void){
@@ -78,10 +77,10 @@ bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req){
 				if (req->wValue&0x01){
 					switch (req->wIndex){
 						case 0x00:
-							PORTB.OUTSET = 1 << 0;
+							PORTB.OUTSET = 1 << 1;
 							break;
 						case 0x01:
-							PORTB.OUTSET = 1 << 1;
+							PORTB.OUTSET = 1 << 0;
 							break;
 						case 0x02:
 							PORTC.OUTSET = 1 << 1;
@@ -90,7 +89,7 @@ bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req){
 							PORTC.OUTSET = 1 << 2;
 							break;
 						case 0x04:
-							PORTC.OUTSET = 1 << 6;
+							PORTC.OUTSET = 1 << 5;
 							break;
 						case 0x05:
 							PORTC.OUTSET = 1 << 7;
@@ -100,10 +99,10 @@ bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req){
 				else{
 					switch (req->wIndex){
 						case 0x00:
-							PORTB.OUTCLR = 1 << 0;
+							PORTB.OUTCLR = 1 << 1;
 							break;
 						case 0x01:
-							PORTB.OUTCLR = 1 << 1;
+							PORTB.OUTCLR = 1 << 0;
 							break;
 						case 0x02:
 							PORTC.OUTCLR = 1 << 1;
@@ -112,7 +111,7 @@ bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req){
 							PORTC.OUTCLR = 1 << 2;
 							break;
 						case 0x04:
-							PORTC.OUTCLR = 1 << 6;
+							PORTC.OUTCLR = 1 << 5;
 							break;
 						case 0x05:
 							PORTC.OUTCLR = 1 << 7;
