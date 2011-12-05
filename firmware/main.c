@@ -29,6 +29,11 @@ void initLED0(void){
 	TCE0.CNT = 0;
 }
 
+void initOtherLEDs(void){
+	PORTB.DIRSET = 1 << 0 | 1 << 1;
+	PORTC.DIRSET = 1 << 1 | 1 << 2 | 1 << 6 | 1 << 7;;
+}
+
 void initADC(void){
     ADCA.CTRLB = ADC_RESOLUTION_12BIT_gc | 1 << ADC_CONMODE_bp | 1 << ADC_IMPMODE_bp | ADC_CURRLIMIT_NO_gc | ADC_FREERUN_bm;                                             
     ADCA.REFCTRL =  ADC_REFSEL_VCC_gc;
@@ -47,6 +52,7 @@ void configHardware(void){
 	USB_ConfigureClock();
 	USB_Init();
 	initLED0();
+	initOtherLEDs();
 	initADC();
 }
 
@@ -65,9 +71,56 @@ bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req){
 					case 0x02: // B
 						TCE0.CCC = req->wValue;
 						break;
-					}	
+				}	
 				USB_ep0_send(0);
 				break;
+			case 0x73: // LEDs
+				if (req->wValue&0x01){
+					switch (req->wIndex){
+						case 0x00:
+							PORTB.OUTSET = 1 << 0;
+							break;
+						case 0x01:
+							PORTB.OUTSET = 1 << 1;
+							break;
+						case 0x02:
+							PORTC.OUTSET = 1 << 1;
+							break;
+						case 0x03:
+							PORTC.OUTSET = 1 << 2;
+							break;
+						case 0x04:
+							PORTC.OUTSET = 1 << 6;
+							break;
+						case 0x05:
+							PORTC.OUTSET = 1 << 7;
+							break;
+						}
+					}
+				else{
+					switch (req->wIndex){
+						case 0x00:
+							PORTB.OUTCLR = 1 << 0;
+							break;
+						case 0x01:
+							PORTB.OUTCLR = 1 << 1;
+							break;
+						case 0x02:
+							PORTC.OUTCLR = 1 << 1;
+							break;
+						case 0x03:
+							PORTC.OUTCLR = 1 << 2;
+							break;
+						case 0x04:
+							PORTC.OUTCLR = 1 << 6;
+							break;
+						case 0x05:
+							PORTC.OUTCLR = 1 << 7;
+							break;
+						}
+					}
+					USB_ep0_send(0);
+					break;
 			case 0xAC: // accelerometer
 				ep0_buf_in[0] = (ADCA.CH0.RES>>2)&0xFF;
 				ep0_buf_in[1] = (ADCA.CH1.RES>>2)&0xFF;
