@@ -3,13 +3,25 @@ import array
 
 class LED(object):
 	def __init__(self):
-		self.R = 0
-		self.G = 0
-		self.B = 0
-		self.color = array.array('B', [self.R, self.B, self.G])
-
-	def toString(self):
-		return self.color.toString()
+		self.color = [0, 0, 0]
+	@property
+	def R(self):
+		return self.color[0]
+	@R.setter
+	def R(self, value):
+		self.color[0] = value
+	@property
+	def B(self):
+		return self.color[1]
+	@B.setter
+	def B(self, value):
+		self.color[1] = value
+	@property
+	def G(self):
+		return self.color[2]
+	@G.setter
+	def G(self, value):
+		self.color[2] = value
 	
 class Protoflo(object):
 	def __init__(self):
