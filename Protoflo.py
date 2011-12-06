@@ -1,5 +1,6 @@
 import usb.core
 import array
+import bitarray
 
 class LED(object):
 	def __init__(self):
@@ -31,7 +32,7 @@ class Protoflo(object):
 			raise IOError("device not found")
 		self.dev.set_configuration()
 		self.LED0 = LED()
-		self.otherLEDs = 6*[0]
+		self.otherLEDs = bitarray.bitarray(6*[0], endian="little")
 
 
 	def setLED0(self):
@@ -41,10 +42,7 @@ class Protoflo(object):
 
 	def setLEDs(self):
 		self.setLED0()
-		i = 0
-		for LEDVal in self.otherLEDs:
-			self.dev.ctrl_transfer(0x40|0x80, 0x73, LEDVal, i, 0)  
-			i += 1
+		self.dev.ctrl_transfer(0x40|0x80, 0x73, ord(self.otherLEDs.tostring()), 0, 0)  
 
 	def getAccel(self):
 		data = self.dev.ctrl_transfer(0x40|0x80, 0xAC, 0, 0, 3)

@@ -74,52 +74,21 @@ bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req){
 				USB_ep0_send(0);
 				break;
 			case 0x73: // LEDs
-				if (req->wValue&0x01){
-					switch (req->wIndex){
-						case 0x00:
-							PORTB.OUTSET = 1 << 1;
-							break;
-						case 0x01:
-							PORTB.OUTSET = 1 << 0;
-							break;
-						case 0x02:
-							PORTC.OUTSET = 1 << 1;
-							break;
-						case 0x03:
-							PORTC.OUTSET = 1 << 2;
-							break;
-						case 0x04:
-							PORTC.OUTSET = 1 << 5;
-							break;
-						case 0x05:
-							PORTC.OUTSET = 1 << 7;
-							break;
-						}
-					}
-				else{
-					switch (req->wIndex){
-						case 0x00:
-							PORTB.OUTCLR = 1 << 1;
-							break;
-						case 0x01:
-							PORTB.OUTCLR = 1 << 0;
-							break;
-						case 0x02:
-							PORTC.OUTCLR = 1 << 1;
-							break;
-						case 0x03:
-							PORTC.OUTCLR = 1 << 2;
-							break;
-						case 0x04:
-							PORTC.OUTCLR = 1 << 5;
-							break;
-						case 0x05:
-							PORTC.OUTCLR = 1 << 7;
-							break;
-						}
-					}
-					USB_ep0_send(0);
-					break;
+				PORTB.OUTSET = !!(req->wValue&1)<<PIN1_bp;
+				PORTB.OUTSET = !!(req->wValue&2)<<PIN0_bp;
+				PORTC.OUTSET = !!(req->wValue&4)<<PIN1_bp;
+				PORTC.OUTSET = !!(req->wValue&8)<<PIN2_bp;
+				PORTC.OUTSET = !!(req->wValue&16)<<PIN5_bp;
+				PORTC.OUTSET = !!(req->wValue&32)<<PIN7_bp;
+
+				PORTB.OUTCLR = !!(~req->wValue&1)<<PIN1_bp;
+				PORTB.OUTCLR = !!(~req->wValue&2)<<PIN0_bp;
+				PORTC.OUTCLR = !!(~req->wValue&4)<<PIN1_bp;
+				PORTC.OUTCLR = !!(~req->wValue&8)<<PIN2_bp;
+				PORTC.OUTCLR = !!(~req->wValue&16)<<PIN5_bp;
+				PORTC.OUTCLR = !!(~req->wValue&32)<<PIN7_bp;
+				USB_ep0_send(0);
+				break;
 			case 0xAC: // accelerometer
 				ep0_buf_in[0] = (ADCA.CH0.RES>>2)&0xFF;
 				ep0_buf_in[1] = (ADCA.CH1.RES>>2)&0xFF;
