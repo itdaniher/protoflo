@@ -1,9 +1,11 @@
 ### protoflo
 
-This branch contains the development files for the only Poi head to move like you do. 
+This branch contains the development files for an RGB / accelerometer mashup, forming the basis for a motion reactive POI head. 
 
 Protoflo contains a high-speed accelerometer monitoring your spin, changing color and pattern hundreds of times a second. It's 100% open and designed to be hackable, giving you the power to map moves to patterns and speed to color. 
 
 Protoflo also charges over USB, keeping you green.
 
 All CAD files, schematics, and board layouts for this project are released under a [CC-by-SA(Share-Alike) license](http://creativecommons.org/licenses/by-sa/3.0/).
+
+This project will probably not be mass produced. Contact me if you want to get a set made, or, better yet, contact me for help making a set yourself.
