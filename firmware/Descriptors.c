@@ -53,8 +53,8 @@ const USB_Descriptor_Device_t PROGMEM XmegaExample_DeviceDescriptor =
 	.Protocol               = USB_CSCP_NoDeviceProtocol,
 
 	.Endpoint0Size          = 64,
-	.VendorID               = 0x9999,
-	.ProductID              = 0xffff,
+	.VendorID               = 0x59E3,
+	.ProductID              = 0xF000,
 	.ReleaseNumber          = VERSION_BCD(02.00),
 
 	.ManufacturerStrIndex   = 0x01,
@@ -116,7 +116,7 @@ const USB_Descriptor_Configuration_t PROGMEM XmegaExample_ConfigurationDescripto
 
 			.EndpointAddress        = (ENDPOINT_DESCRIPTOR_DIR_OUT | 2),
 			.Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = 64,
+			.EndpointSize           = 32,
 			.PollingIntervalMS      = 0x00
 		},
 };
@@ -149,9 +149,9 @@ const USB_Descriptor_String_t PROGMEM XmegaExample_ManufacturerString =
  */
 const USB_Descriptor_String_t PROGMEM XmegaExample_ProductString =
 {
-	.Header                 = {.Size = USB_STRING_LEN(8), .Type = DTYPE_String},
+	.Header                 = {.Size = USB_STRING_LEN(9), .Type = DTYPE_String},
 
-	.UnicodeString          = L"Protoflo"
+	.UnicodeString          = L"Framework"
 };
 
 

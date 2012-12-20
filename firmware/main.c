@@ -1,112 +1,85 @@
-// (C) 2011 Ian Daniher (Nonolith Labs) <ian@nonolithlabs.com>
-
-#define F_CPU 32000000UL
-#include <avr/io.h>
-#include <avr/delay.h>
-
-#include "Descriptors.h"
-
-#include "usb.h"
-
-/* Function Prototypes: */
-void configHardware(void);
-bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req);
+#include "Framework.h"
 
 int main(void){
-	configHardware();
-	sei();	
-	while (1){
-			USB_Task(); // Lower-priority USB polling, like control requests
-	}
-}
-
-void initLED0(void){
-	PORTE.DIRSET = 1 << 1 | 1 << 2 | 1 << 3; // LED0B, LED0G, LED0R
-	TCE0.CTRLA = TC_CLKSEL_DIV64_gc;
-	TCE0.CTRLB = TC0_CCBEN_bm | TC0_CCCEN_bm | TC0_CCDEN_bm | TC_WGMODE_SINGLESLOPE_gc;
-	TCE0.PER = 1024;
-	TCE0.CNT = 0;
-}
-
-void initOtherLEDs(void){
-	PORTB.DIRSET = 1 << 0 | 1 << 1;
-	PORTC.DIRSET = 1 << 1 | 1 << 2 | 1 << 5 | 1 << 7;
-}
-
-void initADC(void){
-    ADCA.CTRLB = ADC_RESOLUTION_12BIT_gc | 1 << ADC_CONMODE_bp | 1 << ADC_IMPMODE_bp | ADC_CURRLIMIT_NO_gc | ADC_FREERUN_bm;                                             
-    ADCA.REFCTRL =  ADC_REFSEL_VCC_gc;
-    ADCA.PRESCALER = ADC_PRESCALER_DIV128_gc;
-    ADCA.EVCTRL = ADC_SWEEP_012_gc;
-    ADCA.CH0.CTRL = ADC_CH_INPUTMODE_DIFFWGAIN_gc | ADC_CH_GAIN_1X_gc;
-    ADCA.CH1.CTRL = ADC_CH_INPUTMODE_DIFFWGAIN_gc | ADC_CH_GAIN_1X_gc;
-    ADCA.CH2.CTRL = ADC_CH_INPUTMODE_DIFFWGAIN_gc | ADC_CH_GAIN_1X_gc;
-    ADCA.CH0.MUXCTRL = 0b100 | ADC_CH_MUXPOS_PIN2_gc; //  INTGND vs ACCEL-X
-    ADCA.CH1.MUXCTRL = 0b100 |  ADC_CH_MUXPOS_PIN3_gc; // INTGND vs ACCEL-Y
-    ADCA.CH2.MUXCTRL = 0b100 | ADC_CH_MUXPOS_PIN4_gc; // INTGND vs ACCEL-Z
-    ADCA.CTRLA = ADC_ENABLE_bm;
-}
-
-void configHardware(void){
 	USB_ConfigureClock();
 	USB_Init();
-	initLED0();
-	initOtherLEDs();
-	initADC();
+	USB.INTCTRLA = USB_BUSEVIE_bm | USB_INTLVL_MED_gc;
+	USB.INTCTRLB = USB_TRNIE_bm | USB_SETUPIE_bm;
+	PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm;
+	sei();
+
+	for (;;){
+	}
+
 }
+
+#define stringify(s) #s
+
+const char PROGMEM hwversion[] = stringify(HW_VERSION);
+const char PROGMEM fwversion[] = stringify(FW_VERSION);
+
+uint8_t usb_cmd = 0;
+uint8_t cmd_data = 0;
 
 /** Event handler for the library USB Control Request reception event. */
 bool EVENT_USB_Device_ControlRequest(USB_Request_Header_t* req){
+	// zero out ep0_buf_in
+	for (uint8_t i = 0; i < 64; i++) ep0_buf_in[i] = 0;
+	usb_cmd = 0;
 	if ((req->bmRequestType & CONTROL_REQTYPE_TYPE) == REQTYPE_VENDOR){
 		switch(req->bRequest){
-			case 0x70: // LED0
-				switch(req->wIndex){
-					case 0x00: // R
-						TCE0.CCD = req->wValue;
-						break;
-					case 0x01: // G
-						TCE0.CCB = req->wValue;
-						break;
-					case 0x02: // B
-						TCE0.CCC = req->wValue;
-						break;
-				}	
-				USB_ep0_send(0);
-				break;
-			case 0x73: // LEDs
-				PORTB.OUTSET = !!(req->wValue&1)<<PIN1_bp;
-				PORTB.OUTSET = !!(req->wValue&2)<<PIN0_bp;
-				PORTC.OUTSET = !!(req->wValue&4)<<PIN1_bp;
-				PORTC.OUTSET = !!(req->wValue&8)<<PIN2_bp;
-				PORTC.OUTSET = !!(req->wValue&16)<<PIN5_bp;
-				PORTC.OUTSET = !!(req->wValue&32)<<PIN7_bp;
+			case 0x00: // Info
+				if (req->wIndex == 0){
+					USB_ep0_send_progmem((uint8_t*)hwversion, sizeof(hwversion));
+				}else if (req->wIndex == 1){
+					USB_ep0_send_progmem((uint8_t*)fwversion, sizeof(fwversion));
+				}
+				return true;
 
-				PORTB.OUTCLR = !!(~req->wValue&1)<<PIN1_bp;
-				PORTB.OUTCLR = !!(~req->wValue&2)<<PIN0_bp;
-				PORTC.OUTCLR = !!(~req->wValue&4)<<PIN1_bp;
-				PORTC.OUTCLR = !!(~req->wValue&8)<<PIN2_bp;
-				PORTC.OUTCLR = !!(~req->wValue&16)<<PIN5_bp;
-				PORTC.OUTCLR = !!(~req->wValue&32)<<PIN7_bp;
+			case 0x70:
+				PORTE_DIRSET = 1 << 0 | 1 << 1 | 1 << 2;
+				TCE0_CTRLA = TC_CLKSEL_DIV1_gc; 
+				TCE0_CTRLB = TC0_CCAEN_bm | TC0_CCBEN_bm | TC0_CCCEN_bm | TC_WGMODE_SINGLESLOPE_gc;
+				TCE0_PER = 1 << 12;
+				switch(req->wIndex){
+					case 0x00:
+						TCE0_CCA = req->wValue; 
+						break;
+					case 0x01:
+						TCE0_CCB = req->wValue; 
+						break;
+					case 0x02:
+						TCE0_CCC = req->wValue; 
+						break;
+				}
 				USB_ep0_send(0);
-				break;
-			case 0xAC: // accelerometer
-				ep0_buf_in[0] = (ADCA.CH0.RES>>2)&0xFF;
-				ep0_buf_in[1] = (ADCA.CH1.RES>>2)&0xFF;
-				ep0_buf_in[2] = (ADCA.CH2.RES>>2)&0xFF;
-				USB_ep0_send(3);
-				break;
-			case 0xBB: // bootload
+				return true;
+			// read EEPROM	
+			case 0xE0: 
+				eeprom_read_block(ep0_buf_in, (void*)(req->wIndex*64), 64);
+				USB_ep0_send(64);
+				return true;
+
+			// write EEPROM	
+			case 0xE1: 
+				usb_cmd = req->bRequest;
+				cmd_data = req->wIndex;
 				USB_ep0_send(0);
-				USB_ep0_wait_for_complete();
-				_delay_us(10000);
-				USB_Detach();
-				_delay_us(100000);
-				void (*enter_bootloader)(void) = (void *) 0x47fc /*0x8ff8/2*/;
-				enter_bootloader();
-				break;
-			}
-		return true;
+				return true; // Wait for OUT data (expecting an OUT transfer)
+
+			// disconnect from USB, jump to bootloader	
+			case 0xBB: 
+				USB_enter_bootloader();
+				return true;
+		}
 	}
 	return false;
 }
 
+void EVENT_USB_Device_ControlOUT(uint8_t* buf, uint8_t count){
+	switch (usb_cmd){
+		case 0xE1: // Write EEPROM
+			eeprom_update_block(buf, (void*)(cmd_data*64), count);
+			break;
+	}
+}
